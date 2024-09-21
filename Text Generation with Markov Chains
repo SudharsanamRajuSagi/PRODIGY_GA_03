@@ -1,0 +1,40 @@
+def build_markov_chain(text, order=2):
+    markov_chain = {}
+    for i in range(len(text) - order):
+        sequence = text[i:i+order]
+        next_char = text[i+order]
+        if sequence not in markov_chain:
+            markov_chain[sequence] = {}
+        if next_char not in markov_chain[sequence]:
+            markov_chain[sequence][next_char] = 0
+        markov_chain[sequence][next_char] += 1
+    return markov_chain
+
+def generate_text(markov_chain, length=100):
+    start_sequence = list(markov_chain.keys())[0]
+    generated_text = start_sequence
+    for _ in range(length):
+        next_char = generate_next_char(markov_chain, start_sequence)
+        generated_text += next_char
+        start_sequence = start_sequence[1:] + next_char
+    return generated_text
+
+def generate_next_char(markov_chain, sequence):
+    if sequence not in markov_chain:
+        return " "
+    possibilities = list(markov_chain[sequence].items())
+    total_count = sum(count for char, count in possibilities)
+    choice = random.random() * total_count
+    cumulative_count = 0
+    for char, count in possibilities:
+        cumulative_count += count
+        if choice <= cumulative_count:
+            return char
+    return " "  # Handle empty probabilities
+
+
+Usage:
+text = "This is a sample text to test the Markov chain."
+markov_chain = build_markov_chain(text)
+generated_text = generate_text(markov_chain, length=50)
+print(generated_text)
